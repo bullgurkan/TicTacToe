@@ -7,8 +7,13 @@ public class GameManager
 {
     int endState;
     Network network;
+    KeybindingManager keybindingManager;
     public void PreGame()
     {
+        keybindingManager = new KeybindingManager();
+        keybindingManager.InitDefualtKeybinds();
+        
+
         // 127.0.0.1
         Console.WriteLine("play on network? y for yes, n for no");
 
@@ -35,13 +40,13 @@ public class GameManager
     { 
 
         World world = new World(20, 4);
-        Input input = new Input(world);
+        InputHandler input = new InputHandler(world);
+        keybindingManager.Start();
 
         Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
 
         Console.CursorVisible = false;
 
-        input.InitDefualtKeybinds();
         world.DrawWorldWholeWorld(input.HoveredTile);
 
         //if no one has won keep playing
@@ -49,7 +54,7 @@ public class GameManager
         {
             if(network == null || network.PlayerId == (int)world.CurrentPlayer)
             {
-                endState = input.Update(world, network);
+                endState = input.Update(world, network, keybindingManager);
             }      
             else
             {
@@ -57,13 +62,14 @@ public class GameManager
                 if (world.InBounds(opponentMove))
                 {
                     endState = world.MakeMove(opponentMove);
+                    input.HoveredTile = opponentMove;
                 }
                    
             }
 
             world.DrawHoveredPos(input.HoveredTile);
 
-            System.Threading.Thread.Sleep(10);
+            System.Threading.Thread.Sleep(1);
         }
 
         network?.Dispose();
@@ -89,11 +95,7 @@ public class GameManager
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press Spacebar to end close");
 
-        while (Console.ReadKey(true).Key != ConsoleKey.Spacebar)
-        {
-
-        }
-
+        keybindingManager.ShutDown();
         
     }
 }
