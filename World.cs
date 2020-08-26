@@ -112,8 +112,6 @@ class World
         }
         prevHoveredTile = hoveredTile;
 
-        //prevents user input from being visable
-        Console.ForegroundColor = Console.BackgroundColor;
     }
 
     /// <summary>
@@ -136,9 +134,6 @@ class World
         prevHoveredTile = hoveredTile;
 
         Console.SetCursorPosition(0, WorldWidth);
-
-        //prevents user inpuit from being visable
-        Console.ForegroundColor = Console.BackgroundColor;
 
     }
 
@@ -171,4 +166,3 @@ class World
         Console.Write("]");
     }
 }
-

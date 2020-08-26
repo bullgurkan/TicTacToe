@@ -57,7 +57,6 @@ public class GameManager
                 if (world.InBounds(opponentMove))
                 {
                     endState = world.MakeMove(opponentMove);
-                    input.HoveredTile = opponentMove;
                 }
                    
             }
@@ -79,18 +78,18 @@ public class GameManager
         Console.WriteLine();
 
         Console.ForegroundColor = endState == 1 ? ConsoleColor.Green : ConsoleColor.Red;
-        Console.Write("Player " + endState + " ");
+        Console.Write($"Player {endState} ");
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write("is the ");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.Write("Winner" + "\n");
+        Console.Write("Winner\n");
 
         Console.WriteLine();
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press Spacebar to end close");
 
-        while (Console.ReadKey().Key != ConsoleKey.Spacebar)
+        while (Console.ReadKey(true).Key != ConsoleKey.Spacebar)
         {
 
         }
