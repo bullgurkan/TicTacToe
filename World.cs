@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Xml;
 
 class World
 {
@@ -14,7 +14,7 @@ class World
     readonly Tile[] world;
     public int WorldWidth { get; private set; }
     readonly int winningRowLength;
-    int prevHoveredTile;
+    int prevHoveredTilePlayer1, prevHoveredTilePlayer2;
 
     public Tile CurrentPlayer { get; private set; }
 
@@ -99,50 +99,74 @@ class World
     /// <summary>
     /// ReDraws the whole world
     /// </summary>
-    public void DrawWorldWholeWorld(int hoveredTile)
+    public void DrawWorldWholeWorld(int hoveredTilePlayer1, int hoveredTilePlayer2)
     {
         Console.SetCursorPosition(0, 0);
         for (int y = 0; y < WorldWidth; y++)
         {
             for (int x = 0; x < WorldWidth; x++)
             {
-                DrawTile(x, y, hoveredTile);
+                DrawTile(x, y, hoveredTilePlayer1, hoveredTilePlayer2);
             }
             Console.WriteLine();
         }
-        prevHoveredTile = hoveredTile;
+        prevHoveredTilePlayer1 = hoveredTilePlayer1;
+        prevHoveredTilePlayer2 = hoveredTilePlayer2;
 
     }
 
     /// <summary>
     /// Replaces the tile at the previous hovered pos and draws the tile at the new hovered pos
     /// </summary>
-    public void DrawHoveredPos(int hoveredTile)
+    public void DrawHoveredPos(int hoveredTilePlayer1, int hoveredTilePlayer2)
     {
 
-        int x = prevHoveredTile % WorldWidth;
-        int y = prevHoveredTile / WorldWidth;
-        Console.SetCursorPosition(x * 3, y);
+        DrawTileAtIndex(prevHoveredTilePlayer1, hoveredTilePlayer1, hoveredTilePlayer2);
+        DrawTileAtIndex(prevHoveredTilePlayer2, hoveredTilePlayer1, hoveredTilePlayer2);
 
-        DrawTile(x, y, hoveredTile);
+        DrawTileAtIndex(hoveredTilePlayer1, hoveredTilePlayer1, hoveredTilePlayer2);
+        DrawTileAtIndex(hoveredTilePlayer2, hoveredTilePlayer1, hoveredTilePlayer2);
 
-        x = hoveredTile % WorldWidth;
-        y = hoveredTile / WorldWidth;
-        Console.SetCursorPosition(x * 3, y);
-        DrawTile(x, y, hoveredTile);
-
-        prevHoveredTile = hoveredTile;
+        prevHoveredTilePlayer1 = hoveredTilePlayer1;
+        prevHoveredTilePlayer2 = hoveredTilePlayer2;
 
         Console.SetCursorPosition(0, WorldWidth);
 
+
+
+    }
+
+    private void DrawTileAtIndex(int index, int hoveredTilePlayer1, int hoveredTilePlayer2)
+    {
+        int x = index % WorldWidth;
+        int y = index / WorldWidth;
+        Console.SetCursorPosition(x * 3, y);
+        DrawTile(x, y, hoveredTilePlayer1, hoveredTilePlayer2);
     }
 
     /// <summary>
     /// Draws a tile at x, y with the border color of white or the color of the player if it's hovered and the middle color the color of the player who controls the tile
     /// </summary>
-    private void DrawTile(int x, int y, int hoveredTile)
+    private void DrawTile(int x, int y, int hoveredTilePlayer1, int hoveredTilePlayer2)
     {
-        ConsoleColor borderColor = x + y * WorldWidth == hoveredTile ? (CurrentPlayer == Tile.Player1 ? ConsoleColor.Green : ConsoleColor.Red) : ConsoleColor.White; ;
+        ConsoleColor borderColor = ConsoleColor.White;
+        if (x + y * WorldWidth == hoveredTilePlayer1)
+        {
+            if (hoveredTilePlayer1 == hoveredTilePlayer2)
+            {
+                borderColor = CurrentPlayer == Tile.Player1 ? ConsoleColor.Green : ConsoleColor.Red;
+            }
+            else
+            {
+                borderColor = ConsoleColor.Green;
+            }
+        }
+        else 
+        if (x + y * WorldWidth == hoveredTilePlayer2)
+        {
+            borderColor = ConsoleColor.Red;
+        }
+            
         Console.ForegroundColor = borderColor;
         Console.Write("[");
         switch (world[x + y * WorldWidth])

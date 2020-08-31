@@ -6,13 +6,14 @@ using System.Text;
 public class GameManager
 {
     int endState;
+
     Network network;
     KeybindingManager keybindingManager;
     public void PreGame()
     {
         keybindingManager = new KeybindingManager();
         keybindingManager.InitDefualtKeybinds();
-        
+
 
         // 127.0.0.1
         Console.WriteLine("play on network? y for yes, n for no");
@@ -30,49 +31,61 @@ public class GameManager
                 Console.WriteLine("input ip to connect to");
                 network.Connect(Console.ReadLine());
             }
-               
-            
+
+           
         }
 
-        
+
     }
     public void RunGame()
-    { 
+    {
 
-        World world = new World(20, 4);
+        World world = new World(20, 5);
         InputHandler input = new InputHandler(world);
         keybindingManager.Start();
+        network?.Start();
 
         Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
 
         Console.CursorVisible = false;
 
-        world.DrawWorldWholeWorld(input.HoveredTile);
+        world.DrawWorldWholeWorld(input.HoveredTile, input.HoveredTile);
+
+        int opponentHoveredTile = input.HoveredTile;
 
         //if no one has won keep playing
         while (endState < 1)
         {
-            if(network == null || network.PlayerId == (int)world.CurrentPlayer)
+            if (network == null)
             {
-                endState = input.Update(world, network, keybindingManager);
-            }      
+                endState = input.Update(world, network, keybindingManager, true);
+                world.DrawHoveredPos(input.HoveredTile, input.HoveredTile);
+            }
             else
             {
-                int opponentMove = network.GetOpponentMove();
-                if (world.InBounds(opponentMove))
+                endState = input.Update(world, network, keybindingManager, network.PlayerId == (int)world.CurrentPlayer);
+
+                if (endState == 0 && network.PlayerId != (int)world.CurrentPlayer)
                 {
-                    endState = world.MakeMove(opponentMove);
-                    input.HoveredTile = opponentMove;
+                    int move = network.GetOpponentMove();
+                     
+                    if (world.InBounds(move))
+                    {
+                        opponentHoveredTile = move;
+                        endState = world.MakeMove(opponentHoveredTile);
+                    }
+
                 }
-                   
+
+                world.DrawHoveredPos(network.PlayerId == 1 ? input.HoveredTile : opponentHoveredTile, network.PlayerId == 2 ? input.HoveredTile : opponentHoveredTile);
             }
 
-            world.DrawHoveredPos(input.HoveredTile);
+
 
             System.Threading.Thread.Sleep(1);
         }
 
-        network?.Dispose();
+        network?.Stop();
 
         PostGame();
     }
@@ -96,7 +109,7 @@ public class GameManager
         Console.WriteLine("Press Spacebar to end close");
 
         keybindingManager.ShutDown();
-        
+
     }
 }
 

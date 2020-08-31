@@ -12,7 +12,7 @@ class InputHandler
         HoveredTile = world.WorldWidth * world.WorldWidth / 2 + world.WorldWidth / 2;
     }
 
-    public int Update(World world, Network net, KeybindingManager keybindingManager)
+    public int Update(World world, Network net, KeybindingManager keybindingManager, bool allowSelect)
     {
         Move? move = keybindingManager.GetMove();
         while (move != null)
@@ -44,11 +44,16 @@ class InputHandler
                     }
                     break;
                 case Move.Select:
-                    if (net != null)
+                    if (allowSelect)
                     {
-                        net.SendMove(HoveredTile);
+                        int endState = world.MakeMove(HoveredTile);
+                        if (net != null && endState != -1)
+                        {
+                            net.SendMove(HoveredTile);
+                        }
+                        return endState;
                     }
-                    return world.MakeMove(HoveredTile);
+                    break;
                 default:
                     break;
             }
